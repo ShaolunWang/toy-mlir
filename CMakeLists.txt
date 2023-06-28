@@ -8,6 +8,12 @@ set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 find_package(MLIR REQUIRED CONFIG)
 
+set(LLVM_LINK_COMPONENTS
+  Core
+  Support
+  nativecodegen
+  OrcJIT
+  )
 message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 set(LLVM_RUNTIME_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/bin)
@@ -40,7 +46,7 @@ add_llvm_executable(toy
 		mlir/ShapeInferencePass.cpp
 		mlir/LowerToAffineLoops.cpp
 		mlir/ToyCombine.cpp
-		# mlir/LowerToLLVM.cpp
+		mlir/LowerToLLVM.cpp
 		DEPENDS OpsIncGen ShapeInferenceInterfaceIncGen
 		)
 	get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
@@ -52,12 +58,21 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(toy
   PRIVATE
     ${dialect_libs}
+    ${conversion_libs}
     MLIRAnalysis
+    MLIRBuiltinToLLVMIRTranslation
     MLIRCallInterfaces
     MLIRCastInterfaces
+    MLIRExecutionEngine
     MLIRIR
+    MLIRLLVMCommonConversion
+    MLIRLLVMDialect
+    MLIRLLVMToLLVMIRTranslation
+    MLIRMemRefDialect
     MLIRParser
     MLIRPass
     MLIRSideEffectInterfaces
     MLIRSupport
-    MLIRTransforms)
+    MLIRTargetLLVMIRExport
+    MLIRTransforms
+    )
